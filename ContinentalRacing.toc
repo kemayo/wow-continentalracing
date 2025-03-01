@@ -1,0 +1,25 @@
+## Interface: 110100
+## Title: Continental Racing
+## Author: Kemayo
+## Notes: Show where races are on the continent maps
+## IconAtlas: racing
+## Version: @package-version@
+## SavedVariables: ContinentalRacingDB
+## OptionalDeps: tekDebug, tekErr, TomTom, HereBeDragons-1.0
+
+## Category-enUS: Map
+## Category-deDE: Karte
+## Category-esES: Mapa
+## Category-esMX: Mapa
+## Category-frFR: Carte
+## Category-itIT: Mappa
+## Category-koKR: 지도
+## Category-ptBR: Mapa
+## Category-ruRU: Карта
+## Category-zhCN: 地图
+## Category-zhTW: 地圖
+
+## X-Curse-Project-ID: 
+## X-Wago-ID: 
+
+addon.lua
