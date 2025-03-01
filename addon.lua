@@ -68,24 +68,37 @@ end
 
 
 local already = {}
+local function addRaceForMap(mapID, childMapID, areaPoiID, definitelyARace)
+	if already[areaPoiID] ~= nil then
+		return
+	end
+	local info = C_AreaPoiInfo.GetAreaPOIInfo(childMapID, areaPoiID)
+	-- print(">>>info", info.atlasName, info.name)
+	if info and (definitelyARace or strlower(info.atlasName or "") == "racing") then
+		local x, y = info.position:GetXY()
+		local minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(childMapID, mapID)
+		if minX then
+			local tx = Lerp(minX, maxX, x)
+			local ty = Lerp(minY, maxY, y)
+			local icon = CreateFrame("Frame")
+			Mixin(icon, RaceMixin)
+			icon:OnLoad(info)
+			HBDP:AddWorldMapIconMap(myname, icon, mapID, tx, ty)
+		end
+	end
+	already[areaPoiID] =  true
+end
 local function addRacesForMap(mapID, childInfo)
 	-- print(">child", childInfo.mapID)
 	for _, raceID in ipairs(C_AreaPoiInfo.GetDragonridingRacesForMap(childInfo.mapID)) do
-		-- print(">>race", raceID)
-		if not already[raceID] then
-			local info = C_AreaPoiInfo.GetAreaPOIInfo(childInfo.mapID, raceID)
-			local x, y = info.position:GetXY()
-			local minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(childInfo.mapID, mapID)
-			if minX then
-				local tx = Lerp(minX, maxX, x)
-				local ty = Lerp(minY, maxY, y)
-				local icon = CreateFrame("Frame")
-				Mixin(icon, RaceMixin)
-				icon:OnLoad(info)
-				HBDP:AddWorldMapIconMap(myname, icon, mapID, tx, ty)
-				already[raceID] = true
-			end
-		end
+		print(">>race", raceID)
+		addRaceForMap(mapID, childInfo.mapID, raceID, true)
+	end
+	-- Seasonal cups aren't races. This is presumably also why they don't
+	-- respect the toggle.
+	for _, areaPoiID in ipairs(C_AreaPoiInfo.GetAreaPOIForMap(childInfo.mapID)) do
+		print(">>poi")
+		addRaceForMap(mapID, childInfo.mapID, areaPoiID)
 	end
 end
 
