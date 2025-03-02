@@ -52,6 +52,42 @@ if not ns.DEBUG then
 	return
 end
 
+do
+	local raceActive = false
+	local irrelevant = {
+		[2016] = true,
+		[2017] = true,
+		[2018] = true,
+		[2019] = true,
+		[2020] = true,
+		[2040] = true,
+		[2041] = true,
+		[2124] = true,
+		[2125] = true,
+		[2131] = true,
+		[2132] = true,
+		[2236] = true,
+	}
+	EventRegistry:RegisterFrameEventAndCallback("CURRENCY_DISPLAY_UPDATE", function(_, currencyType, quantity, quantityChange, quantityGainSource, destroyReason)
+		if currencyType == 2018 and quantity > 0 then
+			raceActive = quantity
+		end
+		if not raceActive then return end
+		if irrelevant[currencyType] then return end
+		if quantity <= 0 then return end
+		-- this *might* be the race currency
+		print("Possible race currency", currencyType, quantity)
+	end)
+	EventRegistry:RegisterFrameEventAndCallback("QUEST_REMOVED", function(_, questID)
+		if questID == raceActive then
+			print("RACE ENDED", questID, C_QuestLog.GetTitleForQuestID(questID))
+			raceActive = false
+		end
+	end)
+end
+
+-- Helpful dump command:
+
 local function printf(str, ...)
 	return print(string.format(str, ...))
 end
