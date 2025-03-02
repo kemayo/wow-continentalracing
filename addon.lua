@@ -17,7 +17,7 @@ end)
 
 local RaceMixin = {}
 function RaceMixin:OnLoad()
-	self:SetSize(24, 24)
+	self:SetSize(20, 20)
 	if not InCombatLockdown() then
 		self:SetPassThroughButtons("LeftButton", "RightButton", "MiddleButton", "Button4", "Button5")
 	end
