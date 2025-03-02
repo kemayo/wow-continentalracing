@@ -52,6 +52,11 @@ function RaceMixin:OnMouseEnter()
 	if self.description and self.description ~= "" then
 		GameTooltip_AddNormalLine(tooltip, self.description)
 	end
+
+	if ns.data[self.areaPoiID] then
+		ns.AddRaceTimesToTooltip(tooltip, ns.data[self.areaPoiID])
+	end
+
 	if self.tooltipWidgetSet then
 		local overflow = GameTooltip_AddWidgetSet(tooltip, self.tooltipWidgetSet, 10)
 		if overflow then
