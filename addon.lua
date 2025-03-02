@@ -1,5 +1,7 @@
 local myname, ns = ...
 
+ns.DEBUG = C_AddOns.GetAddOnMetadata(myname, "Version") == '@'..'project-version@'
+
 local HBDP = LibStub("HereBeDragons-Pins-2.0")
 
 local extra_children = {
@@ -56,6 +58,12 @@ function RaceMixin:OnMouseEnter()
 			verticalPadding = -overflow
 		end
 	end
+
+	if ns.DEBUG then
+		tooltip:AddDoubleLine("areaPoiID", self.areaPoiID)
+		tooltip:AddDoubleLine("originalMapID", self.originalMapID)
+	end
+
 	tooltip:Show()
 	if verticalPadding then
 		tooltip:SetPadding(0, verticalPadding)
@@ -90,6 +98,7 @@ local function addRaceForMap(mapID, childMapID, areaPoiID, definitelyARace)
 	local ty = Lerp(minY, maxY, y)
 	local icon = pool:Acquire()
 	icon:OnAcquire(info)
+	icon.originalMapID = childMapID
 	HBDP:AddWorldMapIconMap(myname, icon, mapID, tx, ty)
 end
 local function addRacesForMap(mapID, childInfo)
