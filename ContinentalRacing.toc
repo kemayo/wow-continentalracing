@@ -3,7 +3,7 @@
 ## Author: Kemayo
 ## Notes: Show where races are on the continent maps
 ## IconAtlas: racing
-## Version: @package-version@
+## Version: @project-version@
 ## SavedVariables: ContinentalRacingDB
 ## OptionalDeps: tekDebug, tekErr, TomTom, HereBeDragons-1.0
 
