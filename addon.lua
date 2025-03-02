@@ -90,6 +90,20 @@ local function addRaceForMap(mapID, childMapID, areaPoiID, definitelyARace)
 	if not minX then
 		return
 	end
+	local allComplete
+	if ns.data[areaPoiID] and ns.data[areaPoiID].achievements then
+		allComplete = true
+		for _, achievementID in ipairs(ns.data[areaPoiID].achievements) do
+			local _, name, _, complete, _, _, _, _, _, icon, _, _, wasEarnedByMe, earnedBy = GetAchievementInfo(achievementID)
+			if not complete then
+				allComplete = false
+				break
+			end
+		end
+	end
+	if ContinentalRacingDB.only_incomplete and allComplete then
+		return
+	end
 	local tx = Lerp(minX, maxX, x)
 	local ty = Lerp(minY, maxY, y)
 	local icon = pool:Acquire()
@@ -146,5 +160,35 @@ end)
 EventRegistry:RegisterFrameEventAndCallback("CVAR_UPDATE", function(_, cvar, value)
 	if cvar == "dragonRidingRacesFilter" and WorldMapFrame:IsVisible() then
 		refreshMapPins(WorldMapFrame:GetMapID())
+	end
+end)
+
+local function isChecked(key)
+	return ContinentalRacingDB[key]
+end
+local function setChecked(key)
+	ContinentalRacingDB[key] = not ContinentalRacingDB[key]
+	refreshMapPins(WorldMapFrame:GetMapID())
+end
+Menu.ModifyMenu("MENU_WORLD_MAP_TRACKING", function(owner, rootDescription, contextData)
+	local mapInfo = C_Map.GetMapInfo(owner:GetParent():GetMapID())
+	if mapInfo and mapInfo.mapType == Enum.UIMapType.Continent then
+		-- "%s Only"
+		local title = RACE_CLASS_ONLY:format(TOOLTIP_UNIT_SPEC_CLASS:format(INCOMPLETE, DRAGONRIDING_RACES_MAP_TOGGLE))
+		rootDescription:CreateDivider()
+		local check = rootDescription:CreateCheckbox(title, isChecked, setChecked, "only_incomplete")
+		check:SetTooltip(function(tooltip, elementDescription)
+			-- this display style is from BlizzardWorldMapTemplates.lua,
+			-- altered to account for SetTooltip not giving us access to the
+			-- same things that SetOnEnter does.
+			local owner = tooltip:GetOwner()
+			tooltip:ClearAllPoints()
+			tooltip:SetPoint("RIGHT", owner, "LEFT", -3, 0)
+			tooltip:SetOwner(owner, "ANCHOR_PRESERVE")
+
+			GameTooltip_SetTitle(tooltip, title)
+			GameTooltip_AddNormalLine(tooltip, ACHIEVEMENT_FILTER_INCOMPLETE_EXPLANATION)
+			tooltip:AddDoubleLine(" ", myname, 1, 1, 1, 0, 1, 1)
+		end)
 	end
 end)
