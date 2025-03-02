@@ -16,7 +16,19 @@ EventUtil.ContinueOnAddOnLoaded(myname, function()
 end)
 
 local RaceMixin = {}
-function RaceMixin:OnLoad(info)
+function RaceMixin:OnLoad()
+	self:SetSize(24, 24)
+	if not InCombatLockdown() then
+		self:SetPassThroughButtons("LeftButton", "RightButton", "MiddleButton", "Button4", "Button5")
+	end
+
+	self.texture = self:CreateTexture(nil, "ARTWORK")
+	self.texture:SetAllPoints()
+
+	self:SetScript("OnEnter", self.OnMouseEnter)
+	self:SetScript("OnLeave", self.OnMouseLeave)
+end
+function RaceMixin:OnAcquire(info)
 	self.poiInfo = info
 	self.areaPoiID = info.areaPoiID
 	self.name = info.name
@@ -25,17 +37,7 @@ function RaceMixin:OnLoad(info)
 	self.iconWidgetSet = info.iconWidgetSet
 	self.textureKit = info.uiTextureKit
 
-	self:SetSize(24, 24)
-	if not InCombatLockdown() then
-		self:SetPassThroughButtons("LeftButton", "RightButton", "MiddleButton", "Button4", "Button5")
-	end
-
-	self.texture = self:CreateTexture(nil, "ARTWORK")
-	self.texture:SetAllPoints()
 	self.texture:SetAtlas(info.atlasName)
-
-	self:SetScript("OnEnter", self.OnMouseEnter)
-	self:SetScript("OnLeave", self.OnMouseLeave)
 end
 function RaceMixin:OnMouseEnter()
 	-- /dump C_AreaPoiInfo.GetAreaPOIInfo(2248, 7781)
@@ -67,42 +69,44 @@ function RaceMixin:OnMouseLeave()
 end
 
 
-local already = {}
+-- frameType, parent, template, resetFunc, forbidden, frameInitializer, capacity
+local pool = CreateFramePool("Frame", nil, nil, nil, nil, function(frame)
+	Mixin(frame, RaceMixin)
+	frame:OnLoad()
+end)
+
 local function addRaceForMap(mapID, childMapID, areaPoiID, definitelyARace)
-	if already[areaPoiID] ~= nil then
-		return
-	end
 	local info = C_AreaPoiInfo.GetAreaPOIInfo(childMapID, areaPoiID)
 	-- print(">>>info", info.atlasName, info.name)
-	if info and (definitelyARace or strlower(info.atlasName or "") == "racing") then
-		local x, y = info.position:GetXY()
-		local minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(childMapID, mapID)
-		if minX then
-			local tx = Lerp(minX, maxX, x)
-			local ty = Lerp(minY, maxY, y)
-			local icon = CreateFrame("Frame")
-			Mixin(icon, RaceMixin)
-			icon:OnLoad(info)
-			HBDP:AddWorldMapIconMap(myname, icon, mapID, tx, ty)
-		end
+	if not (info and (definitelyARace or strlower(info.atlasName or "") == "racing")) then
+		return
 	end
-	already[areaPoiID] =  true
+	local x, y = info.position:GetXY()
+	local minX, maxX, minY, maxY = C_Map.GetMapRectOnMap(childMapID, mapID)
+	if not minX then
+		return
+	end
+	local tx = Lerp(minX, maxX, x)
+	local ty = Lerp(minY, maxY, y)
+	local icon = pool:Acquire()
+	icon:OnAcquire(info)
+	HBDP:AddWorldMapIconMap(myname, icon, mapID, tx, ty)
 end
 local function addRacesForMap(mapID, childInfo)
 	-- print(">child", childInfo.mapID)
 	for _, raceID in ipairs(C_AreaPoiInfo.GetDragonridingRacesForMap(childInfo.mapID)) do
-		print(">>race", raceID)
+		-- print(">>race", raceID)
 		addRaceForMap(mapID, childInfo.mapID, raceID, true)
 	end
 	-- Seasonal cups aren't races. This is presumably also why they don't
 	-- respect the toggle.
 	for _, areaPoiID in ipairs(C_AreaPoiInfo.GetAreaPOIForMap(childInfo.mapID)) do
-		print(">>poi")
+		-- print(">>poi", areaPoiID)
 		addRaceForMap(mapID, childInfo.mapID, areaPoiID)
 	end
 end
 
-EventRegistry:RegisterCallback("MapCanvas.MapSet", function(_, mapID)
+local function refreshMapPins(mapID)
 	-- all needed data should be loaded by now
 	-- print("map", mapID)
 	if not mapID then return end
@@ -110,6 +114,10 @@ EventRegistry:RegisterCallback("MapCanvas.MapSet", function(_, mapID)
 	if not (mapInfo and mapInfo.mapType == Enum.UIMapType.Continent) then
 		return
 	end
+
+	pool:ReleaseAll()
+	HBDP:RemoveAllWorldMapIcons(myname)
+
 	for _, childInfo in ipairs(C_Map.GetMapChildrenInfo(mapID)) do
 		if childInfo.mapType == Enum.UIMapType.Zone then
 			addRacesForMap(mapID, childInfo)
@@ -120,4 +128,8 @@ EventRegistry:RegisterCallback("MapCanvas.MapSet", function(_, mapID)
 			addRacesForMap(mapID, C_Map.GetMapInfo(childID))
 		end
 	end
+end
+
+EventRegistry:RegisterCallback("MapCanvas.MapSet", function(_, mapID)
+	refreshMapPins(mapID)
 end)
