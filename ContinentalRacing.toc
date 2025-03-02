@@ -26,3 +26,5 @@ data.lua
 
 addon.lua
 tooltips.lua
+
+debug.lua
