@@ -1,5 +1,53 @@
 local myname, ns = ...
 
+--[[
+Note to self about how this works:
+
+A race is a quest, behind the scenes.
+
+When a race starts we see CURRENCY_DISPLAY_UPDATE for assorted currencies
+that're state-tracking:
+
+* 2018: Dragon Racing - Temp Storage - Race Quest ID
+* 2040: Dragon Racing - Scoreboard - Personal Best Time
+* 2041: Dragon Racing - Scoreboard - Personal Best Time - Fraction 1
+
+Then there's a QUEST_ACCEPTED for the same quest value that has been put into
+2018.
+
+During the race there's sometimes more updates to 2018, seeming to
+remove/readd the questID for no obvious reason.
+
+When a race finishes we see more CURRENCY_DISPLAY_UPDATEs:
+
+* 2016: Dragon Racing - Scoreboard - Race Complete Time
+* 2017: Dragon Racing - Scoreboard - Race Complete Time - Fraction 1
+* 2124: Dragon Racing - Scoreboard - Race Complete Time - Fraction 10
+* 2125: Dragon Racing - Scoreboard - Race Complete Time - Fraction 100
+* 2236: Dragon Racing - Scoreboard - Race Complete Time MS
+* 2040: Dragon Racing - Scoreboard - Personal Best Time
+* 2041: Dragon Racing - Scoreboard - Personal Best Time - Fraction 1
+* 2131: Dragon Racing - Scoreboard - Personal Best Time - Fraction 10
+* 2132: Dragon Racing - Scoreboard - Personal Best Time - Fraction 100
+* 2019: Dragon Racing - Scoreboard - Race Complete Time - Silver
+* 2020: Dragon Racing - Scoreboard - Race Complete Time - Gold
+* [currency for the current race]
+
+The race complete time values are always updated for the current race. The
+personal best values still fire if you *don't* beat your best, but they're
+just being reset to still contain said best.
+
+Then there's a QUEST_REMOVED for the race-quest, and we're done.
+
+...yes, this is a really weird way to store all this.
+
+All the CURRENCY_DISPLAY_UPDATEs happen twice: once to reset it to 0, and
+again to set it to the new value.
+
+2018 seems to stick around containing whatever the questID of the last race
+the character did, until you start a new race.
+--]]
+
 if not ns.DEBUG then
 	return
 end
