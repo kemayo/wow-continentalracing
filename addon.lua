@@ -118,6 +118,10 @@ local function refreshMapPins(mapID)
 	pool:ReleaseAll()
 	HBDP:RemoveAllWorldMapIcons(myname)
 
+	if not C_CVar.GetCVarBool("dragonRidingRacesFilter") then
+		return
+	end
+
 	for _, childInfo in ipairs(C_Map.GetMapChildrenInfo(mapID)) do
 		if childInfo.mapType == Enum.UIMapType.Zone then
 			addRacesForMap(mapID, childInfo)
@@ -132,4 +136,10 @@ end
 
 EventRegistry:RegisterCallback("MapCanvas.MapSet", function(_, mapID)
 	refreshMapPins(mapID)
+end)
+
+EventRegistry:RegisterFrameEventAndCallback("CVAR_UPDATE", function(_, cvar, value)
+	if cvar == "dragonRidingRacesFilter" and WorldMapFrame:IsVisible() then
+		refreshMapPins(WorldMapFrame:GetMapID())
+	end
 end)
