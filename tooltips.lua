@@ -1,11 +1,15 @@
 local myname, ns = ...
 
 function ns.AddRaceTimesToTooltip(tooltip, race)
-	for i, achievementid in pairs(race.achievements) do
-		local _, name, _, complete = GetAchievementInfo(achievementid)
+	for i, achievementID in pairs(race.achievements) do
+		local _, name, _, complete, _, _, _, _, _, icon, _, _, wasEarnedByMe, earnedBy = GetAchievementInfo(achievementID)
 		local currencyInfo = race.currencies[i] and C_CurrencyInfo.GetCurrencyInfo(race.currencies[i])
+		if complete and not wasEarnedByMe then
+			name = string.format(TEXT_MODE_A_STRING_VALUE_TYPE, name, GREEN_FONT_COLOR:WrapTextInColorCode(earnedBy or ACCOUNT_QUEST_LABEL))
+			complete = false
+		end
 		tooltip:AddDoubleLine(
-			name or achievementid,
+			name or achievementID,
 			currencyInfo and ("%.3f s"):format(currencyInfo.quantity / 1000) or "? s",
 			complete and 0 or 1, complete and 1 or 0, 0,
 			complete and 0 or 1, complete and 1 or 0, 0
