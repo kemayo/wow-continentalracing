@@ -1,5 +1,14 @@
 local myname, ns = ...
 
+ns.extra_children = {
+	-- Note: this is only needed for zones where a child-of-child is relevant,
+	-- and the child-of-child will have data from GetMapRectOnMap
+	[2274] = { -- Khaz Algar
+		2339, -- Dornogal (technically a child of Isle of Dorn)
+		2346, -- Undermine (technically a child of Ringing Deeps)
+	},
+}
+
 local Race = function(achievements, currencies, coord, questID)
 	return {
 		achievements=achievements,

@@ -4,15 +4,6 @@ ns.DEBUG = C_AddOns.GetAddOnMetadata(myname, "Version") == '@'..'project-version
 
 local HBDP = LibStub("HereBeDragons-Pins-2.0")
 
-local extra_children = {
-	-- Note: this is only needed for zones where a child-of-child is relevant,
-	-- and the child-of-child will have data from GetMapRectOnMap
-	[2274] = { -- Khaz Algar
-		2339, -- Dornogal (technically a child of Isle of Dorn)
-		2346, -- Undermine (technically a child of Ringing Deeps)
-	},
-}
-
 EventUtil.ContinueOnAddOnLoaded(myname, function()
 	ContinentalRacingDB = ContinentalRacingDB or {}
 end)
@@ -141,8 +132,8 @@ local function refreshMapPins(mapID)
 			addRacesForMap(mapID, childInfo)
 		end
 	end
-	if extra_children[mapID] then
-		for _, childID in ipairs(extra_children[mapID]) do
+	if ns.extra_children[mapID] then
+		for _, childID in ipairs(ns.extra_children[mapID]) do
 			addRacesForMap(mapID, C_Map.GetMapInfo(childID))
 		end
 	end
