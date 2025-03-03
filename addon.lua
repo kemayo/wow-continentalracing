@@ -74,10 +74,17 @@ end
 
 
 -- frameType, parent, template, resetFunc, forbidden, frameInitializer, capacity
-local pool = CreateFramePool("Frame", nil, nil, nil, nil, function(frame)
-	Mixin(frame, RaceMixin)
-	frame:OnLoad()
-end)
+local pool = CreateFramePool(
+	"Frame", nil, nil,
+	function(_, frame)
+		frame.texture:SetVertexColor(1, 1, 1, 1)
+	end,
+	nil,
+	function(frame)
+		Mixin(frame, RaceMixin)
+		frame:OnLoad()
+	end
+)
 
 local function addRaceForMap(mapID, childMapID, areaPoiID, definitelyARace)
 	local info = C_AreaPoiInfo.GetAreaPOIInfo(childMapID, areaPoiID)
@@ -109,6 +116,14 @@ local function addRaceForMap(mapID, childMapID, areaPoiID, definitelyARace)
 	local icon = pool:Acquire()
 	icon:OnAcquire(info)
 	icon.originalMapID = childMapID
+
+	if allComplete then
+		icon.texture:SetVertexColor(0, 1, 0)
+	elseif allComplete == nil and ns.DEBUG then
+		-- *I* want to know when there's missing data
+		icon.texture:SetVertexColor(0.7, 0, 1)
+	end
+
 	HBDP:AddWorldMapIconMap(myname, icon, mapID, tx, ty)
 end
 local function addRacesForMap(mapID, childInfo)
