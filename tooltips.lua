@@ -1,5 +1,9 @@
 local myname, ns = ...
 
+local COMPLETE_FONT_COLOR = CreateColor(0, 1, 0)
+local PARTIAL_FONT_COLOR = CreateColor(1, 0.66, 0)
+local NOPROGRESS_FONT_COLOR = CreateColor(1, 0, 0)
+
 function ns.AddRaceTimesToTooltip(tooltip, race)
 	for i, achievementID in pairs(race.achievements) do
 		local _, name, _, complete, _, _, _, _, _, icon, _, _, wasEarnedByMe, earnedBy = GetAchievementInfo(achievementID)
@@ -8,11 +12,16 @@ function ns.AddRaceTimesToTooltip(tooltip, race)
 			name = string.format(TEXT_MODE_A_STRING_VALUE_TYPE, name, GREEN_FONT_COLOR:WrapTextInColorCode(earnedBy or ACCOUNT_QUEST_LABEL))
 			complete = false
 		end
+		local r, g, b = NOPROGRESS_FONT_COLOR:GetRGB()
+		if complete then
+			r, g, b = COMPLETE_FONT_COLOR:GetRGB()
+		elseif currencyInfo and currencyInfo.quantity > 0 then
+			r, g, b = PARTIAL_FONT_COLOR:GetRGB()
+		end
 		tooltip:AddDoubleLine(
 			name or achievementID,
 			currencyInfo and ("%.3f s"):format(currencyInfo.quantity / 1000) or "? s",
-			complete and 0 or 1, complete and 1 or 0, 0,
-			complete and 0 or 1, complete and 1 or 0, 0
+			r, g, b, r, g, b
 		)
 	end
 end
