@@ -1,11 +1,11 @@
-## Interface: 110100
+## Interface: 120001, 120000, 110207
 ## Title: Continental Racing
 ## Author: Kemayo
 ## Notes: Show where races are on the continent maps
 ## IconAtlas: racing
 ## Version: @project-version@
 ## SavedVariables: ContinentalRacingDB
-## OptionalDeps: tekDebug, tekErr, TomTom, HereBeDragons-1.0
+## OptionalDeps: tekDebug, tekErr, TomTom, HereBeDragons
 
 ## Category-enUS: Map
 ## Category-deDE: Karte
