@@ -1,4 +1,4 @@
-## Interface: 120001, 120000, 110207
+## Interface: 120001, 120000
 ## Title: Continental Racing
 ## Author: Kemayo
 ## Notes: Show where races are on the continent maps
@@ -22,9 +22,11 @@
 ## X-Curse-Project-ID: 1211296
 ## X-Wago-ID: rNkPbm6a
 
-data.lua
+system.lua
 
+data.lua
 addon.lua
+
 tooltips.lua
 
 debug.lua
