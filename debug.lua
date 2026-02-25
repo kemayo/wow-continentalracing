@@ -132,8 +132,8 @@ SlashCmdList[myname:upper()] = function(msg)
 				table.insert(mapIDs, childInfo.mapID)
 			end
 		end
-		if ns.extra_children[startMapID] then
-			for _, childID in ipairs(ns.extra_children[startMapID]) do
+		if ns.extraChildren[startMapID] then
+			for _, childID in ipairs(ns.extraChildren[startMapID]) do
 				table.insert(mapIDs, childID)
 			end
 		end
